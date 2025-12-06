@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Squidnarios - Tactical Survival Simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- TACTICAL FONT -->
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050810;
+      --bg-alt: #0b111c;
+      --panel: #121826;
+      --accent: #00ffc3;
+      --accent-soft: rgba(0, 255, 195, 0.12);
+      --danger: #ff4b6e;
+      --text: #e5f0ff;
+      --muted: #7f8da3;
+      --border: #1e293b;
+      --warning: #facc15;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Share Tech Mono", monospace;
+      background: radial-gradient(circle at top, #111827 0, #020617 45%, #000 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      padding: 16px;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1200px;
+      background: linear-gradient(145deg, rgba(15,23,42,0.9), rgba(8,15,35,0.95));
+      border-radius: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: 0 0 0 1px rgba(15,23,42,0.7), 0 24px 80px rgba(0,0,0,0.8);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(12px);
+    }
+
+    /* HEADER */
+
+    .app-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: radial-gradient(circle at left, rgba(34,197,94,0.12), transparent 60%);
+    }
+
+    .title-block {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid var(--accent);
+      background: radial-gradient(circle at top, rgba(34,197,94,0.2), rgba(15,23,42,0.9));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 20px;
+      box-shadow: 0 0 18px rgba(34,197,94,0.45);
+    }
+
+    .title-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .title-text h1 {
+      font-size: 22px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .title-text span {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 12px rgba(34,197,94,0.6);
+    }
+
+    /* LAYOUT */
+
+    .app-body {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+      gap: 0;
+      min-height: 560px;
+    }
+
+    @media (max-width: 900px) {
+      .app-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sidebar {
+      border-right: 1px solid rgba(148, 163, 184, 0.25);
+      background: linear-gradient(180deg, rgba(15,23,42,0.9), rgba(8,15,35,0.9));
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+      }
+    }
+
+    .main-panel {
+      padding: 16px 18px 18px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: radial-gradient(circle at top right, rgba(56,189,248,0.15), transparent 55%);
+    }
+
+    /* STATS BARS */
+
+    .stats-wrapper {
+      background: var(--panel);
+      border-radius: 16px;
+      padding: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: 0 0 0 1px rgba(15,23,42,0.8);
+    }
+
+    .stats-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stats-bars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+    }
+
+    .stat-label {
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 10px;
+    }
+
+    .stat-value {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .bar-shell {
+      position: relative;
+      height: 14px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(15,23,42,1), rgba(30,64,175,0.5));
+      overflow: hidden;
+      border: 1px solid rgba(15,23,42,0.8);
+    }
+
+    .bar-fill {
+      position: absolute;
+      inset: 0;
+      width: 60%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), #22c55e);
+      box-shadow: 0 0 16px rgba(34,197,94,0.7);
+      transition: width 160ms ease-out, background 160ms ease-out, box-shadow 160ms ease-out;
+    }
+
+    .bar-fill.low {
+      background: linear-gradient(90deg, var(--danger), #f97316);
+      box-shadow: 0 0 16px rgba(248,113,113,0.9);
+    }
+
+    /* SCENARIO LIST */
+
+    .sidebar-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+    }
+
+    .sidebar-title-row span:last-child {
+      font-size: 10px;
+      color: var(--accent);
+    }
+
+    .scenario-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 360px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .scenario-card {
+      position: relative;
+      background: radial-gradient(circle at top, rgba(15,118,110,0.4), rgba(15,23,42,0.95));
+      border-radius: 14px;
+      padding: 10px 11px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      cursor: pointer;
+      transition: transform 120ms ease-out, box-shadow 120ms ease-out, border-color 120ms ease-out, background 120ms ease-out;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .scenario-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 36px rgba(15,23,42,0.9);
+      border-color: var(--accent);
+    }
+
+    .scenario-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(34,197,94,0.6);
+    }
+
+    .scenario-name {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+    }
+
+    .scenario-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .scenario-tags {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+      font-size: 10px;
+    }
+
+    .tag {
+      border-radius: 999px;
+      padding: 2px 7px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15,23,42,0.9);
+    }
+
+    .difficulty {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    .difficulty[data-level="easy"] { color: #22c55e; }
+    .difficulty[data-level="medium"] { color: #facc15; }
+    .difficulty[data-level="hard"] { color: #fb7185; }
+
+    .scenario-desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* CONTROL PANEL */
+
+    .control-panel {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .control-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      background: radial-gradient(circle at top, rgba(16,185,129,0.4), rgba(15,23,42,0.9));
+      color: var(--accent);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 7px 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 110ms ease-out, box-shadow 110ms ease-out, background 110ms ease-out;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px rgba(22, 163, 74, 0.4);
+      background: radial-gradient(circle at top, rgba(45,212,191,0.6), rgba(15,23,42,0.9));
+    }
+
+    .btn-secondary {
+      border-color: rgba(148, 163, 184, 0.6);
+      color: var(--muted);
+      background: rgba(15,23,42,0.9);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(30,64,175,0.4);
+      color: var(--text);
+    }
+
+    /* MAIN PANEL CONTENT */
+
+    .scenario-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .scenario-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .scenario-title-block h2 {
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+    }
+
+    .scenario-subtitle {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .scenario-chip-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .chip {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      padding: 3px 9px;
+      color: var(--muted);
+      background: rgba(15,23,42,0.85);
+    }
+
+    .chip.glow {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 18px rgba(34,197,94,0.7);
+    }
+
+    .terminal-window {
+      margin-top: 4px;
+      border-radius: 16px;
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.2), rgba(15,23,42,0.98));
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      box-shadow: 0 0 0 1px rgba(15,23,42,0.8);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      font-size: 11px;
+      background: linear-gradient(90deg, rgba(15,23,42,0.9), rgba(15,23,42,0.6));
+      border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .traffic-dots {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #f97316;
+      opacity: 0.85;
+    }
+
+    .dot:nth-child(1) { background: #f97316; }
+    .dot:nth-child(2) { background: #eab308; }
+    .dot:nth-child(3) { background: #22c55e; }
+
+    .terminal-body {
+      padding: 12px 14px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 220px;
+    }
+
+    .terminal-line {
+      color: var(--muted);
+      white-space: pre-wrap;
+    }
+
+    .terminal-line strong {
+      color: var(--accent);
+    }
+
+    .terminal-prompt {
+      color: var(--accent);
+    }
+
+    .question-block {
+      margin-top: 6px;
+      border-radius: 14px;
+      border: 1px dashed rgba(148, 163, 184, 0.5);
+      padding: 10px;
+      background: rgba(15,23,42,0.92);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .question-text {
+      font-size: 13px;
+    }
+
+    .answers-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    @media (min-width: 600px) {
+      .answers-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .answer-option {
+      position: relative;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      padding: 8px 9px;
+      font-size: 11px;
+      cursor: pointer;
+      background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(15,23,42,0.98));
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+      transition: transform 120ms ease-out, box-shadow 120ms ease-out, border-color 120ms ease-out, background 120ms ease-out;
+    }
+
+    .answer-option:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 28px rgba(15,23,42,0.9);
+      border-color: var(--accent);
+      background: radial-gradient(circle at top, rgba(56,189,248,0.3), rgba(15,23,42,0.98));
+      color: var(--text);
+    }
+
+    .answer-option.disabled {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .answer-key {
+      font-size: 10px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-top: 2px;
+    }
+
+    .answer-deltas {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .feedback-line {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .feedback-line.good {
+      color: #22c55e;
+    }
+
+    .feedback-line.bad {
+      color: #fb7185;
+    }
+
+    .footer-row {
+      margin-top: auto;
+      padding-top: 6px;
+      border-top: 1px solid rgba(148, 163, 184, 0.25);
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted);
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hp-status-label {
+      color: var(--accent);
+    }
+
+    .badge-warning {
+      border-radius: 999px;
+      border: 1px solid rgba(250, 204, 21, 0.7);
+      padding: 2px 8px;
+      color: var(--warning);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .badge-fail {
+      border-radius: 999px;
+      border: 1px solid rgba(248, 113, 113, 0.9);
+      padding: 2px 8px;
+      color: #fb7185;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .badge-success {
+      border-radius: 999px;
+      border: 1px solid rgba(34, 197, 94, 0.9);
+      padding: 2px 8px;
+      color: #22c55e;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+  </style>
+</head>
+<body>
+<!-- Background music (put audio/bg-music.mp3 on your USB) -->
+<audio id="bg-audio" src="audio/bg-music.mp3" loop></audio>
+
+<div class="app-shell">
+  <header class="app-header">
+    <div class="title-block">
+      <div class="logo-badge">SQ</div>
+      <div class="title-text">
+        <h1>Squidnarios</h1>
+        <span>Adaptive survival scenario simulator</span>
+      </div>
+    </div>
+    <div class="header-status">
+      <span class="status-dot"></span>
+      <span>SIM CORE ONLINE ▷ PROFILE: ROOKIE OPERATOR</span>
+      <button id="music-toggle" class="btn btn-secondary" style="padding:4px 10px;font-size:10px;">
+        MUSIC: OFF
+      </button>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="stats-wrapper">
+        <div class="stats-header">
+          <span>VITALS MONITOR</span>
+          <span id="round-indicator">ROUND 0 / 0</span>
+        </div>
+        <div class="stats-bars">
+          <div class="stat">
+            <div class="stat-label-row">
+              <span class="stat-label">HP</span>
+              <span class="stat-value" id="hp-label">100%</span>
+            </div>
+            <div class="bar-shell">
+              <div class="bar-fill" id="hp-bar"></div>
+            </div>
+          </div>
+          <div class="stat">
+            <div class="stat-label-row">
+              <span class="stat-label">WATER</span>
+              <span class="stat-value" id="water-label">100%</span>
+            </div>
+            <div class="bar-shell">
+              <div class="bar-fill" id="water-bar"></div>
+            </div>
+          </div>
+          <div class="stat">
+            <div class="stat-label-row">
+              <span class="stat-label">FOOD</span>
+              <span class="stat-value" id="food-label">100%</span>
+            </div>
+            <div class="bar-shell">
+              <div class="bar-fill" id="food-bar"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-title-row">
+        <span>Scenario Deck</span>
+        <span id="difficulty-indicator">Select Mission</span>
+      </div>
+
+      <div class="scenario-list" id="scenario-list">
+        <!-- Filled by JS -->
+      </div>
+
+      <div class="control-panel">
+        <div class="control-row">
+          <button id="btn-start" class="btn">▶ Start Scenario</button>
+          <button id="btn-random" class="btn btn-secondary">🎲 Random</button>
+        </div>
+        <div class="control-row">
+          <span>Tip: Survive with any bar above zero.</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN PANEL -->
+    <main class="main-panel">
+      <div class="scenario-header">
+        <div class="scenario-title-block">
+          <h2 id="scenario-title">No Scenario Loaded</h2>
+          <span class="scenario-subtitle" id="scenario-subtitle">
+            Select a scenario on the left and press START to deploy.
+          </span>
+        </div>
+        <div class="scenario-chip-row">
+          <span class="chip" id="scenario-type-chip">---</span>
+          <span class="chip glow" id="scenario-diff-chip">DIFFICULTY: -</span>
+        </div>
+      </div>
+
+      <section class="terminal-window">
+        <div class="terminal-header">
+          <div class="traffic-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+          <span>terminal.squidnarios // OUTPUT</span>
+          <span>SAFE MODE</span>
+        </div>
+        <div class="terminal-body" id="terminal-body">
+          <div class="terminal-line">
+            &gt; Awaiting mission parameters. Use the SCENARIO DECK to select your test.
+          </div>
+          <div class="terminal-line">
+            &gt; Each decision changes <strong>HP / WATER / FOOD</strong>. Keep them above zero to “survive”.
+          </div>
+          <div class="terminal-line">
+            &gt; This is a <strong>simulation</strong>. In real emergencies, follow local authorities and trusted sources.
+          </div>
+        </div>
+      </section>
+
+      <div class="footer-row">
+        <span>STATUS: <span class="hp-status-label" id="status-label">IDLE ▷ No run active.</span></span>
+        <span id="survival-label">SURVIVAL INDEX: --%</span>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  // --- QUESTION BUILDER (to reach 25 per scenario) -----------------------
+
+  function buildQuestionSet(baseQuestions, length) {
+    const out = [];
+    let i = 0;
+    while (out.length < length) {
+      const template = baseQuestions[i % baseQuestions.length];
+      const index = out.length + 1;
+      const clone = {
+        text:
+          template.text +
+          (index > baseQuestions.length ? " (Phase " + index + ")" : ""),
+        options: template.options.map((opt) => ({
+          text: opt.text,
+          effects: { ...opt.effects },
+          feedback: opt.feedback,
+        })),
+      };
+      out.push(clone);
+      i++;
+    }
+    return out;
+  }
+
+  // --- BASE QUESTIONS FOR MANY SCENARIOS ---------------------------------
+  // Each array has a few core questions; builder expands them to 25 per scenario.
+
+  // 1. Nuclear event
+  const nuclearBase = [
+    {
+      text:
+        "A bright flash and distant shockwave hit your city. Power dies instantly.",
+      options: [
+        {
+          text: "Drop, move away from windows, and get to an interior room.",
+          effects: { hp: +10, water: 0, food: 0 },
+          feedback: "Shielding from blast and glass improves survival.",
+        },
+        {
+          text: "Run outside to get a better view and record it.",
+          effects: { hp: -25, water: 0, food: 0 },
+          feedback: "You’re exposed to debris and possible fallout.",
+        },
+        {
+          text: "Stand at a window just watching.",
+          effects: { hp: -20, water: 0, food: 0 },
+          feedback: "Glass can shatter and injure you badly.",
+        },
+        {
+          text: "Ignore it, keep gaming, assume it’s a transformer.",
+          effects: { hp: -15, water: 0, food: 0 },
+          feedback: "Losing time early is dangerous.",
+        },
+      ],
+    },
+    {
+      text:
+        "You reach a more protected room. Fallout may arrive in minutes to hours.",
+      options: [
+        {
+          text: "Fill tubs/sinks and containers with clean water.",
+          effects: { hp: 0, water: +25, food: 0 },
+          feedback:
+            "Water service might get contaminated or shut off later.",
+        },
+        {
+          text: "Open windows for ‘fresh air’.",
+          effects: { hp: -20, water: 0, food: 0 },
+          feedback: "You could pull fallout dust inside.",
+        },
+        {
+          text: "Grab canned food and snacks, stash them in the shelter room.",
+          effects: { hp: 0, water: 0, food: +20 },
+          feedback: "Calories matter for long shelter time.",
+        },
+        {
+          text: "Spend the time arguing about whose plan is smarter.",
+          effects: { hp: -10, water: 0, food: 0 },
+          feedback: "Arguments burn minutes you might not have.",
+        },
+      ],
+    },
+    {
+      text:
+        "You’re in shelter. Info is unclear. You’re stressed, thirsty, and bored.",
+      options: [
+        {
+          text: "Ration food/water carefully and track each use.",
+          effects: { hp: +5, water: -5, food: -5 },
+          feedback: "Planning now prevents panic later.",
+        },
+        {
+          text: "Chug water and snack constantly to calm down.",
+          effects: { hp: -5, water: -30, food: -20 },
+          feedback: "Comfort now makes later phases harder.",
+        },
+        {
+          text: "Seal door and window gaps with tape/towels if you can.",
+          effects: { hp: +10, water: -5, food: 0 },
+          feedback: "Less dust inside = lower exposure risk.",
+        },
+        {
+          text: "Keep checking outside with doors and windows wide open.",
+          effects: { hp: -25, water: 0, food: 0 },
+          feedback: "You might bring contaminants into your shelter.",
+        },
+      ],
+    },
+  ];
+
+  // 2. EMP / tech blackout
+  const empBase = [
+    {
+      text:
+        "Streetlights go dark, cars stall, phones die everywhere at once.",
+      options: [
+        {
+          text: "Step off the road and move to a safer, familiar building.",
+          effects: { hp: +5, water: 0, food: 0 },
+          feedback: "You avoid chaos and traffic dangers.",
+        },
+        {
+          text: "Stand in the intersection yelling for answers.",
+          effects: { hp: -10, water: 0, food: 0 },
+          feedback: "You’re exposed and not actually improving anything.",
+        },
+        {
+          text: "Try to restart every stalled car you pass.",
+          effects: { hp: -5, water: 0, food: 0 },
+          feedback: "Wasted effort during a bigger grid failure.",
+        },
+        {
+          text: "Move calmly, noticing exits, alleys, and safe routes.",
+          effects: { hp: +5, water: 0, food: 0 },
+          feedback: "Awareness is a survival skill.",
+        },
+      ],
+    },
+    {
+      text:
+        "You reach a lobby with other people. Darkness and nerves are building.",
+      options: [
+        {
+          text: "Suggest staying together in a safer interior area.",
+          effects: { hp: +5, water: 0, food: 0 },
+          feedback: "Groups can watch out for each other.",
+        },
+        {
+          text: "Explore dark stairwells alone ‘for fun’.",
+          effects: { hp: -15, water: -5, food: 0 },
+          feedback: "Hidden hazards + no backup = bad combo.",
+        },
+        {
+          text: "Help search for water, snacks, and first aid.",
+          effects: { hp: +5, water: +10, food: +10 },
+          feedback: "Supplies raise everyone’s chances.",
+        },
+        {
+          text: "Start blaming random people loudly.",
+          effects: { hp: -10, water: 0, food: 0 },
+          feedback: "Conflict makes a rough situation worse.",
+        },
+      ],
+    },
+    {
+      text: "Water still runs in the building—for now.",
+      options: [
+        {
+          text: "Fill bottles and containers while pressure is good.",
+          effects: { hp: 0, water: +20, food: 0 },
+          feedback: "You might not get another chance.",
+        },
+        {
+          text: "Waste water splashing people ‘as a joke’.",
+          effects: { hp: -5, water: -25, food: 0 },
+          feedback: "Future thirst won’t be funny.",
+        },
+        {
+          text: "Show others where restrooms and taps are located.",
+          effects: { hp: +5, water: +5, food: 0 },
+          feedback: "Helping the group helps you too.",
+        },
+        {
+          text: "Ignore the water and just pace in circles.",
+          effects: { hp: -5, water: -10, food: 0 },
+          feedback: "You miss easy prep time.",
+        },
+      ],
+    },
+  ];
+
+  // 3. Wasteland post-crisis
+  const wastelandBase = [
+    {
+      text:
+        "On a cracked highway, you spot a small stream and an old gas station.",
+      options: [
+        {
+          text: "Filter/boil stream water before drinking.",
+          effects: { hp: +10, water: +20, food: 0 },
+          feedback: "Clean water avoids a lot of sickness.",
+        },
+        {
+          text: "Drink straight from the stream, no treatment.",
+          effects: { hp: -15, water: +10, food: 0 },
+          feedback: "Short-term relief, long-term risk.",
+        },
+        {
+          text: "Skip the stream and search the station first.",
+          effects: { hp: -5, water: -10, food: +10 },
+          feedback: "Water usually beats snacks in priority.",
+        },
+        {
+          text: "Nap in the open parking lot with no cover.",
+          effects: { hp: -10, water: -5, food: 0 },
+          feedback: "You’re exposed and less alert.",
+        },
+      ],
+    },
+    {
+      text:
+        "Inside, you find cans, tools, and a few basic medical supplies.",
+      options: [
+        {
+          text: "Take a balanced amount you can carry easily.",
+          effects: { hp: +5, water: 0, food: +15 },
+          feedback: "You stay mobile and supplied.",
+        },
+        {
+          text: "Overpack everything until your bag is bursting.",
+          effects: { hp: -10, water: 0, food: +25 },
+          feedback: "Too much weight beats you down over time.",
+        },
+        {
+          text: "Leave everything in place and walk away.",
+          effects: { hp: -10, water: 0, food: -10 },
+          feedback: "Skipping easy resources hurts later.",
+        },
+        {
+          text: "Spend hours rearranging items instead of resting.",
+          effects: { hp: -10, water: -5, food: 0 },
+          feedback: "Perfectionism burns energy.",
+        },
+      ],
+    },
+    {
+      text:
+        "Night approaches on the road. You’re tired with limited supplies.",
+      options: [
+        {
+          text: "Find shelter, eat a small meal, and rest.",
+          effects: { hp: +10, water: -5, food: -10 },
+          feedback: "Rest keeps you functional tomorrow.",
+        },
+        {
+          text: "March all night to ‘get there faster’.",
+          effects: { hp: -20, water: -10, food: -10 },
+          feedback: "Exhaustion wrecks judgment and health.",
+        },
+        {
+          text: "Eat all your food now and then sleep.",
+          effects: { hp: -5, water: 0, food: -30 },
+          feedback: "Tomorrow’s you has nothing to eat.",
+        },
+        {
+          text: "Use no food or water to ‘save it’.",
+          effects: { hp: -15, water: -10, food: 0 },
+          feedback: "Your body still needs fuel even at rest.",
+        },
+      ],
+    },
+  ];
+
+  // 4. Earthquake in a city
+  const quakeBase = [
+    {
+      text:
+        "A strong earthquake hits. The building shakes hard and things fall.",
+      options: [
+        {
+          text: "Drop, cover under sturdy furniture, and hold on.",
+          effects: { hp: +10, water: 0, food: 0 },
+          feedback: "Standard quake safety reduces injuries.",
+        },
+        {
+          text: "Run for the stairs during the shaking.",
+          effects: { hp: -20, water: 0, food: 0 },
+          feedback: "Stairs and exits are dangerous mid-quake.",
+        },
+        {
+          text: "Stand in a doorway full of glass panels.",
+          effects: { hp: -10, water: 0, food: 0 },
+          feedback: "Glass and debris are a risk.",
+        },
+        {
+          text: "Panic and sprint in random directions.",
+          effects: { hp: -15, water: 0, food: 0 },
+          feedback: "Running increases your chance of getting hit.",
+        },
+      ],
+    },
+    {
+      text:
+        "The shaking stops. There might be aftershocks and damage around you.",
+      options: [
+        {
+          text: "Check yourself/others for serious injuries first.",
+          effects: { hp: +5, water: 0, food: 0 },
+          feedback: "Health comes before property.",
+        },
+        {
+          text: "Use stairs carefully to exit the building if it seems unsafe.",
+          effects: { hp: +5, water: 0, food: -5 },
+          feedback:
+            "Leaving a damaged building can be smart when done calmly.",
+        },
+        {
+          text: "Use elevators to get out faster.",
+          effects: { hp: -20, water: 0, food: 0 },
+          feedback: "Elevators can fail after quakes.",
+        },
+        {
+          text: "Hang out near brick walls and power lines outside.",
+          effects: { hp: -15, water: 0, food: 0 },
+          feedback: "Falling objects and lines are hazards.",
+        },
+      ],
+    },
+    {
+      text:
+        "You’ve reached an open area. Phone service is weak and people are scared.",
+      options: [
+        {
+          text: "Stay in the open, away from buildings and big trees.",
+          effects: { hp: +5, water: -5, food: 0 },
+          feedback: "Safer from falling debris during aftershocks.",
+        },
+        {
+          text: "Stand right next to damaged buildings to “get shade”.",
+          effects: { hp: -15, water: 0, food: 0 },
+          feedback: "More rubble could fall.",
+        },
+        {
+          text: "Conserve battery and only use phone for real updates.",
+          effects: { hp: +5, water: 0, food: 0 },
+          feedback: "You may need that charge later.",
+        },
+        {
+          text: "Use all your battery on random videos.",
+          effects: { hp: -5, water: 0, food: 0 },
+          feedback: "No power = no easy recharge.",
+        },
+      ],
+    },
+  ];
+
+  // 5. Superstorm / hurricane + flooding
+  const stormBase = [
+    {
+      text:
+        "A major storm is forecast. You’re still at home in a risk zone.",
+      options: [
+        {
+          text: "Secure loose items, charge devices, gather water and food.",
+          effects: { hp: +5, water: +10, food: +10 },
+          feedback: "Prep before the storm is key.",
+        },
+        {
+          text: "Ignore warnings and keep scrolling memes.",
+          effects: { hp: -10, water: 0, food: 0 },
+          feedback: "Lost prep time hurts later.",
+        },
+        {
+          text: "Move important items and gear to higher shelves.",
+          effects: { hp: +5, water: 0, food: 0 },
+          feedback: "Helps if flooding happens.",
+        },
+        {
+          text: "Leave all windows open for ‘fresh air’.",
+          effects: { hp: -15, water: 0, food: 0 },
+          feedback: "Wind and rain can cause damage inside.",
+        },
+      ],
+    },
+    {
+      text: "The storm hits hard. Strong wind, heavy rain, power goes out.",
+      options: [
+        {
+          text: "Stay inside, away from windows, use flashlights not candles.",
+          effects: { hp: +10, water: -5, food: -5 },
+          feedback: "You reduce fire and injury risk.",
+        },
+        {
+          text: "Walk outside to ‘feel the power of nature’.",
+          effects: { hp: -25, water: 0, food: 0 },
+          feedback: "Flying debris and flood water are dangerous.",
+        },
+        {
+          text: "Drive through flooded streets to get snacks.",
+          effects: { hp: -20, water: 0, food: 0 },
+          feedback: "Flooded roads can hide deep hazards.",
+        },
+        {
+          text: "Check on neighbors if it’s safe and close.",
+          effects: { hp: +5, water: -5, food: -5 },
+          feedback: "Mutual support helps everyone.",
+        },
+      ],
+    },
+    {
+      text:
+        "Water rises in nearby streets. You’re on slightly higher ground.",
+      options: [
+        {
+          text: "Avoid walking/driving through flood water.",
+          effects: { hp: +5, water: 0, food: 0 },
+          feedback: "You can’t see what’s under that water.",
+        },
+        {
+          text: "Play in the flood water like a pool.",
+          effects: { hp: -25, water: 0, food: 0 },
+          feedback: "Flood water can be contaminated or fast-moving.",
+        },
+        {
+          text: "Listen for official evacuation or shelter instructions.",
+          effects: { hp: +5, water: -5, food: -5 },
+          feedback: "Trusted info beats rumors.",
+        },
+        {
+          text: "Follow random social posts instead of local alerts.",
+          effects: { hp: -10, water: 0, food: 0 },
+          feedback: "Bad info can send you into danger.",
+        },
+      ],
+    },
+  ];
+
+  // 6. Pandemic / outbreak lockdown
+  const pandemicBase = [
+    {
+      text:
+        "A serious outbreak spreads. Authorities urge staying home when sick.",
+      options: [
+        {
+          text: "Follow health guidance and avoid close contact if you’re ill.",
+          effects: { hp: +10, water: 0, food: 0 },
+          feedback: "Helps protect you and others.",
+        },
+        {
+          text: "Go to crowded events even with symptoms.",
+          effects: { hp: -20, water: 0, food: 0 },
+          feedback: "You risk spreading illness.",
+        },
+        {
+          text: "Stock up calmly on a reasonable amount of supplies.",
+          effects: { hp: +5, water: +10, food: +10 },
+          feedback: "Prepared, not panicked.",
+        },
+        {
+          text: "Panic-buy everything and block others from supplies.",
+          effects: { hp: -10, water: 0, food: 0 },
+          feedback: "That creates more chaos for everyone.",
+        },
+      ],
+    },
+    {
+      text:
+        "Someone in your home feels sick during a heavy outbreak wave.",
+      options: [
+        {
+          text: "Encourage rest, fluids, and follow local medical advice.",
+          effects: { hp: +5, water: -5, food: -5 },
+          feedback: "Basic care and guidance matter.",
+        },
+        {
+          text: "Ignore symptoms and pretend nothing is wrong.",
+          effects: { hp: -10, water: 0, food: 0 },
+          feedback: "Delaying care can make things worse.",
+        },
+        {
+          text: "Use a separate room if possible and keep things cleaner.",
+          effects: { hp: +5, water: -5, food: 0 },
+          feedback: "Reducing spread risk helps.",
+        },
+        {
+          text: "Share drinks/utensils to ‘prove you’re not scared’.",
+          effects: { hp: -15, water: 0, food: 0 },
+          feedback: "That raises infection risk.",
+        },
+      ],
+    },
+    {
+      text:
+        "Lockdowns and rules are stressful. You feel trapped and bored.",
+      options: [
+        {
+          text: "Keep a routine: sleep, exercise, hobbies, check-ins.",
+          effects: { hp: +10, water: -5, food: -5 },
+          feedback: "Structure helps mental health.",
+        },
+        {
+          text: "Doomscroll endlessly and never move from bed.",
+          effects: { hp: -10, water: -5, food: -5 },
+          feedback: "Mood and body both suffer.",
+        },
+        {
+          text: "Stay connected with friends in safe ways (online, messages).",
+          effects: { hp: +5, water: 0, food: 0 },
+          feedback: "Support helps you cope.",
+        },
+        {
+          text: "Spread rumors and fake news for fun.",
+          effects: { hp: -10, water: 0, food: 0 },
+          feedback: "False info can hurt people.",
+        },
+      ],
+    },
+  ];
+
+  // 7. Lost in the forest
+  const forestBase = [
+    {
+      text:
+        "You’re hiking, get off-trail, and realize you’re lost near sunset.",
+      options: [
+        {
+          text: "Stop, mark your spot, and try to get your bearings calmly.",
+          effects: { hp: +5, water: -5, food: 0 },
+          feedback: "Stopping prevents getting more lost.",
+        },
+        {
+          text: "Run in random directions to ‘find the trail fast’.",
+          effects: { hp: -15, water: -10, food: -5 },
+          feedback: "Easy to get even more turned around.",
+        },
+        {
+          text: "Use your map/compass or phone GPS if available.",
+          effects: { hp: +10, water: -5, food: 0 },
+          feedback: "Navigation tools are there for a reason.",
+        },
+        {
+          text: "Ignore your gear and just guess a direction.",
+          effects: { hp: -10, water: -5, food: 0 },
+          feedback: "Guessing can send you deeper away.",
+        },
+      ],
+    },
+    {
+      text:
+        "Night is coming. You’re unsure of exact location but not injured.",
+      options: [
+        {
+          text: "Find a safe spot to make a basic shelter and stay put.",
+          effects: { hp: +5, water: -5, food: -5 },
+          feedback: "Easier for rescuers to find you if you stay.",
+        },
+        {
+          text: "Keep walking through rough terrain in the dark.",
+          effects: { hp: -20, water: -10, food: -5 },
+          feedback: "You risk falls and injuries.",
+        },
+        {
+          text: "Signal if you can (whistle, light, bright clothing).",
+          effects: { hp: +5, water: 0, food: 0 },
+          feedback: "Signals help searchers locate you.",
+        },
+        {
+          text: "Hide quietly and never make a sound.",
+          effects: { hp: -5, water: -5, food: 0 },
+          feedback: "Silence makes you harder to find.",
+        },
+      ],
+    },
+    {
+      text: "You feel thirsty and hungry in the forest.",
+      options: [
+        {
+          text: "Use safe water sources or filters if you packed them.",
+          effects: { hp: +5, water: +15, food: 0 },
+          feedback: "Hydration is key, but make it as safe as you can.",
+        },
+        {
+          text: "Eat random plants and mushrooms you can’t identify.",
+          effects: { hp: -20, water: 0, food: 0 },
+          feedback: "Unknown plants can be toxic.",
+        },
+        {
+          text: "Ration your snacks and sip water, not chug.",
+          effects: { hp: +5, water: -5, food: -5 },
+          feedback: "Controlled use lasts longer.",
+        },
+        {
+          text: "Eat everything right away out of stress.",
+          effects: { hp: -5, water: 0, food: -20 },
+          feedback: "You’ll have nothing left if it takes time.",
+        },
+      ],
+    },
+  ];
+
+  // 8. Stranded in the desert
+  const desertBase = [
+    {
+      text:
+        "Your vehicle breaks down on a hot desert road with limited water.",
+      options: [
+        {
+          text: "Stay near the vehicle, use shade, and signal for help.",
+          effects: { hp: +10, water: -10, food: -5 },
+          feedback: "Vehicles are easier to spot than people.",
+        },
+        {
+          text: "Walk into the desert at midday with no clear route.",
+          effects: { hp: -25, water: -20, food: -10 },
+          feedback: "Heat and dehydration stack quickly.",
+        },
+        {
+          text: "Ration water and avoid over-exertion.",
+          effects: { hp: +5, water: -5, food: -5 },
+          feedback: "Slow use stretches your supplies.",
+        },
+        {
+          text: "Drink all your water immediately.",
+          effects: { hp: -10, water: -40, food: 0 },
+          feedback: "You’ll need it later more than now.",
+        },
+      ],
+    },
+    {
+      text: "The sun is intense. You need to control heat exposure.",
+      options: [
+        {
+          text: "Use clothing/blankets to cover skin from direct sun.",
+          effects: { hp: +5, water: -5, food: 0 },
+          feedback: "Covering up can reduce sun damage.",
+        },
+        {
+          text: "Take off as much clothing as possible to ‘stay cool’.",
+          effects: { hp: -10, water: -5, food: 0 },
+          feedback: "Bare skin burns and loses moisture faster.",
+        },
+        {
+          text: "Limit movement during peak heat, move more at cooler times.",
+          effects: { hp: +5, water: -5, food: -5 },
+          feedback: "You burn less water and energy.",
+        },
+        {
+          text: "Jog laps around the car to ‘stay active’.",
+          effects: { hp: -15, water: -10, food: -5 },
+          feedback: "Unnecessary exertion in heat is risky.",
+        },
+      ],
+    },
+    {
+      text:
+        "Time passes. You’re unsure how long help will take to arrive.",
+      options: [
+        {
+          text: "Create visible signals (big shapes, reflective surfaces).",
+          effects: { hp: +5, water: -5, food: 0 },
+          feedback: "Improves your chance of being spotted.",
+        },
+        {
+          text: "Sit low in a ditch where you can’t be seen.",
+          effects: { hp: -10, water: -5, food: 0 },
+          feedback: "You’re harder to find.",
+        },
+        {
+          text: "Track how much water/food you have and set a plan.",
+          effects: { hp: +5, water: -5, food: -5 },
+          feedback: "Planning reduces panic.",
+        },
+        {
+          text: "Refuse to think about supplies at all.",
+          effects: { hp: -5, water: -5, food: -5 },
+          feedback: "Ignoring reality doesn’t help.",
+        },
+      ],
+    },
+  ];
+
+  // 9. Blizzard blackout (winter storm)
+  const blizzardBase = [
+    {
+      text:
+        "A major blizzard is forecast. Temps will drop and power may fail.",
+      options: [
+        {
+          text: "Gather warm clothes, blankets, food, and water indoors.",
+          effects: { hp: +10, water: +5, food: +5 },
+          feedback: "Prep keeps you warmer and fed.",
+        },
+        {
+          text: "Ignore it and keep windows open because you like cold.",
+          effects: { hp: -15, water: 0, food: 0 },
+          feedback: "Heat loss can be serious.",
+        },
+        {
+          text: "Charge devices and check flashlights/batteries.",
+          effects: { hp: +5, water: 0, food: 0 },
+          feedback: "Power loss is common in storms.",
+        },
+        {
+          text: "Plan to drive around during the peak of the storm.",
+          effects: { hp: -20, water: 0, food: 0 },
+          feedback: "Road conditions can get deadly.",
+        },
+      ],
+    },
+    {
+      text: "Snow piles up, power goes out, and it’s very cold.",
+      options: [
+        {
+          text: "Stay inside, block drafts, and use safe heat sources only.",
+          effects: { hp: +10, water: -5, food: -5 },
+          feedback: "You keep heat in and avoid carbon monoxide risk.",
+        },
+        {
+          text: "Run a grill or stove indoors for heat.",
+          effects: { hp: -25, water: 0, food: 0 },
+          feedback: "Indoor burning can be extremely dangerous.",
+        },
+        {
+          text: "Wear layers and share warm spaces with others.",
+          effects: { hp: +5, water: -5, food: -5 },
+          feedback: "Body heat and layers conserve warmth.",
+        },
+        {
+          text: "Open doors often just to check how deep snow is.",
+          effects: { hp: -5, water: 0, food: 0 },
+          feedback: "You let heat escape constantly.",
+        },
+      ],
+    },
+    {
+      text:
+        "You’re low on energy and the storm keeps going outside.",
+      options: [
+        {
+          text: "Move a bit, stretch, and eat small, regular meals.",
+          effects: { hp: +5, water: -5, food: -10 },
+          feedback: "Helps circulation and warmth.",
+        },
+        {
+          text: "Refuse to eat or drink to ‘save everything’.",
+          effects: { hp: -10, water: -10, food: 0 },
+          feedback: "Your body still needs fuel.",
+        },
+        {
+          text: "Check on neighbors if they’re very close and it’s safe.",
+          effects: { hp: +5, water: -5, food: -5 },
+          feedback: "People can help each other.",
+        },
+        {
+          text: "Try to walk far through deep snow to ‘escape’.",
+          effects: { hp: -20, water: -10, food: -10 },
+          feedback: "You risk hypothermia and exhaustion.",
+        },
+      ],
+    },
+  ];
+
+  // 10. Shipwreck at sea (small boat)
+  const seaBase = [
+    {
+      text:
+        "Your small boat is damaged in rough seas. You have a life jacket and some gear.",
+      options: [
+        {
+          text: "Put on life jacket properly and secure key gear.",
+          effects: { hp: +10, water: 0, food: 0 },
+          feedback: "Personal flotation is critical on water.",
+        },
+        {
+          text: "Ignore the jacket, you can swim fine.",
+          effects: { hp: -20, water: 0, food: 0 },
+          feedback: "Fatigue and waves can overwhelm strong swimmers.",
+        },
+        {
+          text: "Use radio or signal devices if available.",
+          effects: { hp: +5, water: 0, food: 0 },
+          feedback: "Signaling increases rescue chances.",
+        },
+        {
+          text: "Throw gear overboard to ‘lighten the boat’ randomly.",
+          effects: { hp: -5, water: -5, food: -5 },
+          feedback: "You might toss needed supplies.",
+        },
+      ],
+    },
+    {
+      text:
+        "You end up in a life raft / flotation with limited water and food.",
+      options: [
+        {
+          text: "Ration water and food carefully, avoid drinking seawater.",
+          effects: { hp: +5, water: -5, food: -5 },
+          feedback: "Rationing avoids quick dehydration.",
+        },
+        {
+          text: "Drink seawater because you’re very thirsty.",
+          effects: { hp: -25, water: 0, food: 0 },
+          feedback: "Seawater makes dehydration worse.",
+        },
+        {
+          text: "Use covers or clothing to reduce sun exposure.",
+          effects: { hp: +5, water: -5, food: 0 },
+          feedback: "Less sunburn and water loss.",
+        },
+        {
+          text: "Lie in direct sun with no cover.",
+          effects: { hp: -15, water: -10, food: 0 },
+          feedback: "Sunburn and heat add up fast.",
+        },
+      ],
+    },
+    {
+      text:
+        "Waves and time keep passing. You’re mentally and physically tired.",
+      options: [
+        {
+          text: "Keep a simple routine: watch, rest, signal when possible.",
+          effects: { hp: +5, water: -5, food: -5 },
+          feedback: "Routine helps you stay focused.",
+        },
+        {
+          text: "Give up signaling completely and stare at the floor.",
+          effects: { hp: -10, water: 0, food: 0 },
+          feedback: "Less chance someone will see you.",
+        },
+        {
+          text: "Group close for warmth and stability if others are there.",
+          effects: { hp: +5, water: 0, food: 0 },
+          feedback: "Teamwork helps morale and safety.",
+        },
+        {
+          text: "Jump in and swim toward the horizon alone.",
+          effects: { hp: -20, water: -10, food: -10 },
+          feedback: "You lose the flotation and make rescue harder.",
+        },
+      ],
+    },
+  ];
+
+  // --- SCENARIO DEFINITIONS (ALL 25 QUESTIONS EACH) ----------------------
+
+  const scenarios = [
+    {
+      id: "nuclear-dusk",
+      name: "Nuclear Dusk",
+      difficulty: "hard",
+      type: "NUCLEAR EVENT",
+      tags: ["Fallout", "Urban", "Shelter"],
+      description:
+        "A distant detonation knocks out power and communications. You have minutes to react before fallout drifts over your city.",
+      startingStats: { hp: 100, water: 70, food: 70 },
+      questions: buildQuestionSet(nuclearBase, 25),
+    },
+    {
+      id: "emp-city",
+      name: "EMP City Blackout",
+      difficulty: "medium",
+      type: "TECH GRID DOWN",
+      tags: ["EMP", "City", "Blackout"],
+      description:
+        "Electronics everywhere abruptly fail. No lights, no cars, no signal. You’re stuck downtown with a small backpack.",
+      startingStats: { hp: 100, water: 65, food: 60 },
+      questions: buildQuestionSet(empBase, 25),
+    },
+    {
+      id: "wasteland-echo",
+      name: "Wasteland Echo",
+      difficulty: "hard",
+      type: "APOCALYPSE MIX",
+      tags: ["Outbreak", "Travel", "Scavenging"],
+      description:
+        "Weeks after a global crisis, you’re on foot between small towns. Supplies are thin and stress is high.",
+      startingStats: { hp: 90, water: 60, food: 55 },
+      questions: buildQuestionSet(wastelandBase, 25),
+    },
+    {
+      id: "quake-zone",
+      name: "Quake Zone",
+      difficulty: "medium",
+      type: "EARTHQUAKE",
+      tags: ["Urban", "Disaster", "Debris"],
+      description:
+        "A major earthquake hits while you’re in a multi-story building in a crowded city.",
+      startingStats: { hp: 100, water: 60, food: 60 },
+      questions: buildQuestionSet(quakeBase, 25),
+    },
+    {
+      id: "storm-surge",
+      name: "Storm Surge",
+      difficulty: "medium",
+      type: "HURRICANE / FLOOD",
+      tags: ["Storm", "Flood", "Blackout"],
+      description:
+        "A powerful superstorm slams into your region, bringing extreme wind, rain, and possible flooding.",
+      startingStats: { hp: 100, water: 80, food: 75 },
+      questions: buildQuestionSet(stormBase, 25),
+    },
+    {
+      id: "outbreak-lockdown",
+      name: "Outbreak Lockdown",
+      difficulty: "medium",
+      type: "PANDEMIC",
+      tags: ["Health", "Stress", "Home"],
+      description:
+        "A dangerous illness spreads. Authorities issue guidance and restrictions to slow it down.",
+      startingStats: { hp: 100, water: 80, food: 80 },
+      questions: buildQuestionSet(pandemicBase, 25),
+    },
+    {
+      id: "forest-lost",
+      name: "Forest Lost",
+      difficulty: "medium",
+      type: "WILDERNESS",
+      tags: ["Hiking", "Navigation", "Rescue"],
+      description:
+        "A day hike goes wrong. You’re off-trail in a large forest as daylight fades.",
+      startingStats: { hp: 95, water: 70, food: 60 },
+      questions: buildQuestionSet(forestBase, 25),
+    },
+    {
+      id: "desert-stranded",
+      name: "Desert Stranded",
+      difficulty: "hard",
+      type: "HEAT EXPOSURE",
+      tags: ["Desert", "Vehicle", "Dehydration"],
+      description:
+        "Your vehicle fails on a remote desert road with brutal heat and limited supplies.",
+      startingStats: { hp: 90, water: 60, food: 55 },
+      questions: buildQuestionSet(desertBase, 25),
+    },
+    {
+      id: "whiteout-grid",
+      name: "Whiteout Grid",
+      difficulty: "medium",
+      type: "WINTER STORM",
+      tags: ["Cold", "Blackout", "Snow"],
+      description:
+        "A huge blizzard hits, cutting power and trapping you at home in freezing conditions.",
+      startingStats: { hp: 100, water: 80, food: 80 },
+      questions: buildQuestionSet(blizzardBase, 25),
+    },
+    {
+      id: "sea-drift",
+      name: "Sea Drift",
+      difficulty: "hard",
+      type: "MARITIME",
+      tags: ["Boat", "Rescue", "Exposure"],
+      description:
+        "A storm damages your small boat. You end up in a life raft with limited supplies on open water.",
+      startingStats: { hp: 95, water: 50, food: 50 },
+      questions: buildQuestionSet(seaBase, 25),
+    },
+  ];
+
+  // --- STATE -------------------------------------------------------------
+
+  let selectedScenarioId = null;
+  let currentScenario = null;
+  let currentQuestionIndex = 0;
+  let stats = { hp: 100, water: 100, food: 100 };
+  let runActive = false;
+
+  // audio state
+  let bgAudio = null;
+  let musicOn = false;
+
+  // --- GENERAL HELPERS ---------------------------------------------------
+
+  function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+  }
+
+  function updateStatsBars() {
+    const hpBar = document.getElementById("hp-bar");
+    const waterBar = document.getElementById("water-bar");
+    const foodBar = document.getElementById("food-bar");
+    const hpLabel = document.getElementById("hp-label");
+    const waterLabel = document.getElementById("water-label");
+    const foodLabel = document.getElementById("food-label");
+
+    const hp = clamp(stats.hp, 0, 100);
+    const water = clamp(stats.water, 0, 100);
+    const food = clamp(stats.food, 0, 100);
+
+    hpBar.style.width = hp + "%";
+    waterBar.style.width = water + "%";
+    foodBar.style.width = food + "%";
+
+    hpLabel.textContent = hp + "%";
+    waterLabel.textContent = water + "%";
+    foodLabel.textContent = food + "%";
+
+    [hpBar, waterBar, foodBar].forEach((el, idx) => {
+      const val = idx === 0 ? hp : idx === 1 ? water : food;
+      if (val <= 30) {
+        el.classList.add("low");
+      } else {
+        el.classList.remove("low");
+      }
+    });
+
+    const roundIndicator = document.getElementById("round-indicator");
+    if (currentScenario) {
+      roundIndicator.textContent =
+        "ROUND " +
+        (currentQuestionIndex + 1) +
+        " / " +
+        currentScenario.questions.length;
+    } else {
+      roundIndicator.textContent = "ROUND 0 / 0";
+    }
+
+    const avg = Math.round((hp + water + food) / 3);
+    document.getElementById("survival-label").textContent =
+      "SURVIVAL INDEX: " + avg + "%";
+  }
+
+  function setStatus(message, type = "neutral") {
+    const label = document.getElementById("status-label");
+    label.textContent = message;
+    if (type === "critical") {
+      label.style.color = "#fb7185";
+    } else if (type === "good") {
+      label.style.color = "#22c55e";
+    } else {
+      label.style.color = "#00ffc3";
+    }
+  }
+
+  // music toggle
+  function toggleMusic() {
+    if (!bgAudio) return;
+
+    if (musicOn) {
+      bgAudio.pause();
+      musicOn = false;
+      document.getElementById("music-toggle").textContent = "MUSIC: OFF";
+    } else {
+      bgAudio.volume = 0.4;
+      bgAudio.play().catch(() => {});
+      musicOn = true;
+      document.getElementById("music-toggle").textContent = "MUSIC: ON";
+    }
+  }
+
+  // --- UI RENDERING ------------------------------------------------------
+
+  function renderScenarioList() {
+    const container = document.getElementById("scenario-list");
+    container.innerHTML = "";
+    scenarios.forEach((sc) => {
+      const card = document.createElement("div");
+      card.className = "scenario-card";
+      card.dataset.id = sc.id;
+
+      const tagsHtml = sc.tags
+        .map((t) => `<span class="tag">${t}</span>`)
+        .join("");
+
+      card.innerHTML = `
+        <div class="scenario-name">${sc.name}</div>
+        <div class="scenario-meta">
+          <div class="scenario-tags">${tagsHtml}</div>
+          <div class="difficulty" data-level="${sc.difficulty}">
+            ${sc.difficulty.toUpperCase()}
+          </div>
+        </div>
+        <div class="scenario-desc">${sc.description}</div>
+      `;
+
+      card.addEventListener("click", () => {
+        selectedScenarioId = sc.id;
+        document
+          .querySelectorAll(".scenario-card")
+          .forEach((el) => el.classList.remove("active"));
+        card.classList.add("active");
+        document.getElementById("difficulty-indicator").textContent =
+          "Selected ▷ " + sc.difficulty.toUpperCase();
+        showScenarioPreview(sc);
+      });
+
+      container.appendChild(card);
+    });
+  }
+
+  function showScenarioPreview(sc) {
+    const titleEl = document.getElementById("scenario-title");
+    const subEl = document.getElementById("scenario-subtitle");
+    const typeChip = document.getElementById("scenario-type-chip");
+    const diffChip = document.getElementById("scenario-diff-chip");
+    const terminalBody = document.getElementById("terminal-body");
+
+    titleEl.textContent = sc.name;
+    subEl.textContent = sc.description;
+    typeChip.textContent = sc.type;
+    diffChip.textContent = "DIFFICULTY: " + sc.difficulty.toUpperCase();
+
+    terminalBody.innerHTML = `
+      <div class="terminal-line">
+        &gt; LOADED SCENARIO: <strong>${sc.name}</strong>
+      </div>
+      <div class="terminal-line">
+        &gt; TYPE: ${sc.type} │ DIFFICULTY: ${sc.difficulty.toUpperCase()}
+      </div>
+      <div class="terminal-line">
+        &gt; BRIEF: ${sc.description}
+      </div>
+      <div class="terminal-line">
+        &gt; Each run has <strong>${sc.questions.length}</strong> decision phases.
+      </div>
+      <div class="terminal-line">
+        &gt; Hit <strong>START SCENARIO</strong> to deploy.
+      </div>
+    `;
+  }
+
+  function startScenario(sc) {
+    currentScenario = sc;
+    currentQuestionIndex = 0;
+    stats = { ...sc.startingStats };
+    runActive = true;
+    updateStatsBars();
+    setStatus("RUN ACTIVE ▷ Make tactical decisions.");
+    renderCurrentQuestion();
+  }
+
+  function renderCurrentQuestion(lastFeedback = null, lastEffects = null) {
+    const terminalBody = document.getElementById("terminal-body");
+    if (!currentScenario) return;
+
+    const q = currentScenario.questions[currentQuestionIndex];
+
+    let lines = `
+      <div class="terminal-line">
+        &gt; SIM RUN: <strong>${currentScenario.name}</strong>
+      </div>
+      <div class="terminal-line">
+        &gt; PHASE ${currentQuestionIndex + 1} / ${
+          currentScenario.questions.length
+        }
+      </div>`;
+
+    if (lastFeedback && lastEffects) {
+      const cls = lastEffects.hp >= 0 ? "good" : "bad";
+      const sign = (v) => (v > 0 ? "+" + v : v);
+      lines += `
+        <div class="terminal-line feedback-line ${cls}">
+          &gt; LAST MOVE: ${lastFeedback}
+        </div>
+        <div class="terminal-line">
+          &gt; ΔSTATS → HP ${sign(lastEffects.hp)}, WATER ${sign(
+        lastEffects.water
+      )}, FOOD ${sign(lastEffects.food)}
+        </div>`;
+    }
+
+    lines += `
+      <div class="question-block">
+        <div class="question-text">
+          <span class="terminal-prompt">?</span> ${q.text}
+        </div>
+        <div class="answers-grid">
+          ${q.options
+            .map((opt, idx) => {
+              const letter = String.fromCharCode(65 + idx);
+              const ef = opt.effects;
+              const s = (v) => (v > 0 ? "+" + v : v);
+              return `
+              <button class="answer-option" data-index="${idx}">
+                <div style="flex:0 0 auto;">
+                  <div class="answer-key">Option ${letter}</div>
+                </div>
+                <div style="flex:1 1 auto;">
+                  <div>${opt.text}</div>
+                  <div class="answer-deltas">
+                    HP ${s(ef.hp)} │ WATER ${s(ef.water)} │ FOOD ${s(ef.food)}
+                  </div>
+                </div>
+              </button>
+            `;
+            })
+            .join("")}
+        </div>
+      </div>
+    `;
+
+    terminalBody.innerHTML = lines;
+
+    terminalBody
+      .querySelectorAll(".answer-option")
+      .forEach((btn) =>
+        btn.addEventListener("click", () => handleAnswerClick(btn))
+      );
+  }
+
+  function handleAnswerClick(btn) {
+    if (!currentScenario || !runActive) return;
+
+    const idx = parseInt(btn.dataset.index, 10);
+    const q = currentScenario.questions[currentQuestionIndex];
+    const choice = q.options[idx];
+
+    stats.hp = clamp(stats.hp + choice.effects.hp, 0, 100);
+    stats.water = clamp(stats.water + choice.effects.water, 0, 100);
+    stats.food = clamp(stats.food + choice.effects.food, 0, 100);
+    updateStatsBars();
+
+    document
+      .querySelectorAll(".answer-option")
+      .forEach((el) => el.classList.add("disabled"));
+
+    if (stats.hp <= 0 || stats.water <= 0 || stats.food <= 0) {
+      runActive = false;
+      showEndScreen(false, choice.feedback, choice.effects);
+      return;
+    }
+
+    if (currentQuestionIndex >= currentScenario.questions.length - 1) {
+      runActive = false;
+      showEndScreen(true, choice.feedback, choice.effects);
+    } else {
+      currentQuestionIndex += 1;
+      renderCurrentQuestion(choice.feedback, choice.effects);
+    }
+  }
+
+  function showEndScreen(survived, lastFeedback, lastEffects) {
+    const terminalBody = document.getElementById("terminal-body");
+    const hp = clamp(stats.hp, 0, 100);
+    const water = clamp(stats.water, 0, 100);
+    const food = clamp(stats.food, 0, 100);
+    const avg = Math.round((hp + water + food) / 3);
+
+    const sign = (v) => (v > 0 ? "+" + v : v);
+    const endBadge = survived
+      ? `<span class="badge-success">SIM RESULT: SURVIVED</span>`
+      : `<span class="badge-fail">SIM RESULT: FAILED</span>`;
+
+    terminalBody.innerHTML = `
+      <div class="terminal-line">
+        &gt; SIM RUN COMPLETE: <strong>${currentScenario.name}</strong>
+      </div>
+      <div class="terminal-line feedback-line ${
+        lastEffects && lastEffects.hp >= 0 ? "good" : "bad"
+      }">
+        &gt; LAST MOVE: ${lastFeedback}
+      </div>
+      <div class="terminal-line">
+        &gt; FINAL ΔSTATS (LAST MOVE) → HP ${sign(
+          lastEffects ? lastEffects.hp : 0
+        )}, WATER ${sign(lastEffects ? lastEffects.water : 0)}, FOOD ${sign(
+      lastEffects ? lastEffects.food : 0
+    )}
+      </div>
+      <div class="question-block">
+        <div class="question-text">
+          ${endBadge}
+        </div>
+        <div class="terminal-line" style="margin-top:8px;">
+          &gt; FINAL VITALS → HP ${hp} │ WATER ${water} │ FOOD ${food}
+        </div>
+        <div class="terminal-line">
+          &gt; SURVIVAL INDEX ESTIMATE: ${avg}%
+        </div>
+        <div class="terminal-line" style="margin-top:8px;">
+          &gt; Remember: This is a <strong>simulation</strong>. In real life, follow local emergency services and trusted adults.
+        </div>
+      </div>
+      <div class="terminal-line" style="margin-top:8px;">
+        &gt; Try new scenarios, or rerun this one with different choices.
+      </div>
+    `;
+
+    if (survived) {
+      setStatus(
+        "SIM END ▷ You survived this run. Try to improve your index.",
+        "good"
+      );
+    } else {
+      setStatus(
+        "SIM END ▷ Vital bars hit zero. Adjust your strategy and retry.",
+        "critical"
+      );
+    }
+  }
+
+  // --- INIT + EVENTS -----------------------------------------------------
+
+  function attachControls() {
+    document.getElementById("btn-start").addEventListener("click", () => {
+      const sc =
+        scenarios.find((s) => s.id === selectedScenarioId) || scenarios[0];
+      selectedScenarioId = sc.id;
+
+      document.querySelectorAll(".scenario-card").forEach((el) => {
+        if (el.dataset.id === sc.id) el.classList.add("active");
+        else el.classList.remove("active");
+      });
+
+      showScenarioPreview(sc);
+      startScenario(sc);
+    });
+
+    document.getElementById("btn-random").addEventListener("click", () => {
+      const idx = Math.floor(Math.random() * scenarios.length);
+      const sc = scenarios[idx];
+      selectedScenarioId = sc.id;
+
+      document.querySelectorAll(".scenario-card").forEach((el) => {
+        if (el.dataset.id === sc.id) el.classList.add("active");
+        else el.classList.remove("active");
+      });
+
+      showScenarioPreview(sc);
+      startScenario(sc);
+    });
+  }
+
+  function init() {
+    bgAudio = document.getElementById("bg-audio");
+
+    renderScenarioList();
+    updateStatsBars();
+    attachControls();
+
+    const musicButton = document.getElementById("music-toggle");
+    if (musicButton) {
+      musicButton.addEventListener("click", toggleMusic);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
